@@ -1,28 +1,60 @@
 {
   "Global": {
-    "By Type": {
-      "Sub-Normothermic Perfusion (20–34°C)": {},
-      "Warm or Normothermic Perfusion (35–37°C)": {}
+    "By Offering": {
+      "Software": {
+        "Integrated Software Platforms": {
+          "End-to-End Dealership Management Suites": {},
+          "Unified Front-Office + Back-Office Platforms": {}
+        },
+        "Standalone Software Platforms": {
+          "Modular / Point Solutions": {}
+        },
+        "Core Functional Modules": {
+          "Vehicle Inventory Management": {},
+          "Sales Management & Deal Structuring": {},
+          "Finance, Accounting & Insurance (F&I) Systems": {},
+          "Title & Registration Automation": {}
+        },
+        "Digital & Advanced Capabilities": {
+          "Digital Retailing & Online Car Buying Platforms": {},
+          "Advanced Analytics & Business Intelligence": {},
+          "AI-Based Pricing & Demand Forecasting": {}
+        },
+        "Customer & Revenue Growth Tools": {
+          "Marketing Automation & Lead Management": {},
+          "Trade-In, Appraisal & Valuation Tools": {},
+          "Customer Engagement & Loyalty Platforms": {}
+        },
+        "Others (Document Management, E-Signature & Contract Automation, etc.)": {}
+      },
+      "Services": {
+        "Implementation & System Integration": {},
+        "Training & Support": {},
+        "Managed Services and Hosted Operations": {}
+      }
     },
-    "By Organ Type": {
-      "Liver": {},
-      "Heart": {},
-      "Lung": {},
-      "Kidney": {},
-      "Others (Pancreas, Small bowel / Intestine, Composite Tissues / Limb Perfusion (emerging use cases))": {}
+    "By Functionality": {
+      "Sales & CRM Management": {},
+      "Inventory Management": {},
+      "Finance & Insurance (F&I)": {},
+      "Service & Parts Management": {},
+      "Accounting & Compliance": {},
+      "Analytics & Reporting": {}
     },
-    "Application / Use Case": {
-      "Organ Preservation": {},
-      "Viability Assessment": {},
-      "Physiologic Transport": {},
-      "Reconditioning Marginal Organs": {},
-      "Others (Research Use / Protocol development)": {}
+    "By Deployment Model": {
+      "Cloud-based (SaaS)": {},
+      "On-premise": {},
+      "Hybrid": {}
     },
-    "By End User": {
-      "Hospitals & Clinics": {},
-      "Specialty Clinic/Centers": {},
-      "Transplant Centers": {},
-      "Others (Research Institutes/Centers, Organ Procurement Organizations, etc.)": {}
+    "By Business Size": {
+      "Small Dealerships (Single Location)": {},
+      "Mid-size Dealerships (2–5 Locations)": {},
+      "Large Dealer Groups (6+ Locations)": {}
+    },
+    "By Vehicle Type": {
+      "Passenger Vehicles": {},
+      "Light Commercial Vehicles (LCV)": {},
+      "Heavy Commercial Vehicles (HCV)": {}
     },
     "By Region": {
       "North America": {

@@ -13,92 +13,145 @@ const regions = {
   "Middle East & Africa": ["GCC", "South Africa", "Rest of Middle East & Africa"]
 };
 
-// New segment definitions with market share splits (proportions within each segment type)
+// Hierarchical "By Offering" tree — leaves carry shares (must sum to ~1.0 across all leaves in this segType)
+const byOfferingTree = {
+  "Software": {
+    "Integrated Software Platforms": {
+      "End-to-End Dealership Management Suites": 0.14,
+      "Unified Front-Office + Back-Office Platforms": 0.10
+    },
+    "Standalone Software Platforms": {
+      "Modular / Point Solutions": 0.07
+    },
+    "Core Functional Modules": {
+      "Vehicle Inventory Management": 0.07,
+      "Sales Management & Deal Structuring": 0.07,
+      "Finance, Accounting & Insurance (F&I) Systems": 0.07,
+      "Title & Registration Automation": 0.04
+    },
+    "Digital & Advanced Capabilities": {
+      "Digital Retailing & Online Car Buying Platforms": 0.07,
+      "Advanced Analytics & Business Intelligence": 0.05,
+      "AI-Based Pricing & Demand Forecasting": 0.04
+    },
+    "Customer & Revenue Growth Tools": {
+      "Marketing Automation & Lead Management": 0.05,
+      "Trade-In, Appraisal & Valuation Tools": 0.03,
+      "Customer Engagement & Loyalty Platforms": 0.04
+    },
+    "Others (Document Management, E-Signature & Contract Automation, etc.)": 0.02
+  },
+  "Services": {
+    "Implementation & System Integration": 0.06,
+    "Training & Support": 0.04,
+    "Managed Services and Hosted Operations": 0.04
+  }
+};
+
+// Growth multipliers for By Offering leaves (relative to regional CAGR)
+const byOfferingGrowth = {
+  "End-to-End Dealership Management Suites": 1.05,
+  "Unified Front-Office + Back-Office Platforms": 1.08,
+  "Modular / Point Solutions": 0.92,
+  "Vehicle Inventory Management": 1.00,
+  "Sales Management & Deal Structuring": 1.02,
+  "Finance, Accounting & Insurance (F&I) Systems": 0.98,
+  "Title & Registration Automation": 1.10,
+  "Digital Retailing & Online Car Buying Platforms": 1.22,
+  "Advanced Analytics & Business Intelligence": 1.18,
+  "AI-Based Pricing & Demand Forecasting": 1.30,
+  "Marketing Automation & Lead Management": 1.15,
+  "Trade-In, Appraisal & Valuation Tools": 1.08,
+  "Customer Engagement & Loyalty Platforms": 1.12,
+  "Others (Document Management, E-Signature & Contract Automation, etc.)": 1.05,
+  "Implementation & System Integration": 0.95,
+  "Training & Support": 0.90,
+  "Managed Services and Hosted Operations": 1.10
+};
+
+// Other (flat) segment types
 const segmentTypes = {
-  "By Type": {
-    "Sub-Normothermic Perfusion (20–34°C)": 0.55,
-    "Warm or Normothermic Perfusion (35–37°C)": 0.45
+  "By Functionality": {
+    "Sales & CRM Management": 0.24,
+    "Inventory Management": 0.18,
+    "Finance & Insurance (F&I)": 0.17,
+    "Service & Parts Management": 0.16,
+    "Accounting & Compliance": 0.13,
+    "Analytics & Reporting": 0.12
   },
-  "By Organ Type": {
-    "Liver": 0.35,
-    "Heart": 0.22,
-    "Lung": 0.18,
-    "Kidney": 0.15,
-    "Others (Pancreas, Small bowel / Intestine, Composite Tissues / Limb Perfusion (emerging use cases))": 0.10
+  "By Deployment Model": {
+    "Cloud-based (SaaS)": 0.62,
+    "On-premise": 0.22,
+    "Hybrid": 0.16
   },
-  "Application / Use Case": {
-    "Organ Preservation": 0.30,
-    "Viability Assessment": 0.25,
-    "Physiologic Transport": 0.20,
-    "Reconditioning Marginal Organs": 0.15,
-    "Others (Research Use / Protocol development)": 0.10
+  "By Business Size": {
+    "Small Dealerships (Single Location)": 0.28,
+    "Mid-size Dealerships (2–5 Locations)": 0.37,
+    "Large Dealer Groups (6+ Locations)": 0.35
   },
-  "By End User": {
-    "Hospitals & Clinics": 0.40,
-    "Specialty Clinic/Centers": 0.25,
-    "Transplant Centers": 0.25,
-    "Others (Research Institutes/Centers, Organ Procurement Organizations, etc.)": 0.10
+  "By Vehicle Type": {
+    "Passenger Vehicles": 0.68,
+    "Light Commercial Vehicles (LCV)": 0.22,
+    "Heavy Commercial Vehicles (HCV)": 0.10
   }
 };
 
-// Regional base values (USD Million) for 2021 - total market per region
-// Global Normothermic Machine Perfusion market ~$300M in 2021, growing ~12% CAGR
+// Regional base values (USD Million) for 2021 - global Automotive DMS market ~$8B in 2021
 const regionBaseValues = {
-  "North America": 120,
-  "Europe": 90,
-  "Asia Pacific": 50,
-  "Latin America": 20,
-  "Middle East & Africa": 15
+  "North America": 3000,
+  "Europe": 2200,
+  "Asia Pacific": 1800,
+  "Latin America": 600,
+  "Middle East & Africa": 400
 };
 
-// Country share within region (must sum to ~1.0)
+// Country share within region
 const countryShares = {
-  "North America": { "U.S.": 0.82, "Canada": 0.18 },
-  "Europe": { "U.K.": 0.18, "Germany": 0.22, "Italy": 0.12, "France": 0.16, "Spain": 0.10, "Russia": 0.08, "Rest of Europe": 0.14 },
-  "Asia Pacific": { "China": 0.28, "India": 0.12, "Japan": 0.25, "South Korea": 0.12, "ASEAN": 0.10, "Australia": 0.07, "Rest of Asia Pacific": 0.06 },
-  "Latin America": { "Brazil": 0.45, "Argentina": 0.15, "Mexico": 0.25, "Rest of Latin America": 0.15 },
-  "Middle East & Africa": { "GCC": 0.45, "South Africa": 0.25, "Rest of Middle East & Africa": 0.30 }
+  "North America": { "U.S.": 0.85, "Canada": 0.15 },
+  "Europe": { "U.K.": 0.20, "Germany": 0.24, "Italy": 0.12, "France": 0.16, "Spain": 0.10, "Russia": 0.06, "Rest of Europe": 0.12 },
+  "Asia Pacific": { "China": 0.30, "India": 0.14, "Japan": 0.22, "South Korea": 0.10, "ASEAN": 0.12, "Australia": 0.07, "Rest of Asia Pacific": 0.05 },
+  "Latin America": { "Brazil": 0.42, "Argentina": 0.14, "Mexico": 0.30, "Rest of Latin America": 0.14 },
+  "Middle East & Africa": { "GCC": 0.48, "South Africa": 0.22, "Rest of Middle East & Africa": 0.30 }
 };
 
-// Growth rates (CAGR) per region - slightly different for variety
+// Growth rates (CAGR) per region
 const regionGrowthRates = {
-  "North America": 0.115,
-  "Europe": 0.108,
-  "Asia Pacific": 0.145,
-  "Latin America": 0.125,
-  "Middle East & Africa": 0.118
+  "North America": 0.085,
+  "Europe": 0.082,
+  "Asia Pacific": 0.115,
+  "Latin America": 0.095,
+  "Middle East & Africa": 0.090
 };
 
-// Segment-specific growth multipliers (relative to regional base CAGR)
+// Segment-specific growth multipliers for flat segments
 const segmentGrowthMultipliers = {
-  "By Type": {
-    "Sub-Normothermic Perfusion (20–34°C)": 0.95,
-    "Warm or Normothermic Perfusion (35–37°C)": 1.07
+  "By Functionality": {
+    "Sales & CRM Management": 1.05,
+    "Inventory Management": 0.98,
+    "Finance & Insurance (F&I)": 1.00,
+    "Service & Parts Management": 0.96,
+    "Accounting & Compliance": 0.94,
+    "Analytics & Reporting": 1.20
   },
-  "By Organ Type": {
-    "Liver": 1.08,
-    "Heart": 1.05,
-    "Lung": 1.12,
-    "Kidney": 0.95,
-    "Others (Pancreas, Small bowel / Intestine, Composite Tissues / Limb Perfusion (emerging use cases))": 1.20
+  "By Deployment Model": {
+    "Cloud-based (SaaS)": 1.18,
+    "On-premise": 0.72,
+    "Hybrid": 1.05
   },
-  "Application / Use Case": {
-    "Organ Preservation": 0.92,
-    "Viability Assessment": 1.15,
-    "Physiologic Transport": 1.05,
-    "Reconditioning Marginal Organs": 1.18,
-    "Others (Research Use / Protocol development)": 1.10
+  "By Business Size": {
+    "Small Dealerships (Single Location)": 0.92,
+    "Mid-size Dealerships (2–5 Locations)": 1.05,
+    "Large Dealer Groups (6+ Locations)": 1.10
   },
-  "By End User": {
-    "Hospitals & Clinics": 0.98,
-    "Specialty Clinic/Centers": 1.10,
-    "Transplant Centers": 1.08,
-    "Others (Research Institutes/Centers, Organ Procurement Organizations, etc.)": 1.05
+  "By Vehicle Type": {
+    "Passenger Vehicles": 1.00,
+    "Light Commercial Vehicles (LCV)": 1.08,
+    "Heavy Commercial Vehicles (HCV)": 1.04
   }
 };
 
-// Volume multiplier: units per USD Million (rough: ~500 units per $1M for perfusion devices)
-const volumePerMillionUSD = 480;
+// Volume multiplier: dealership software seats/licenses per USD Million (~120 licenses per $1M)
+const volumePerMillionUSD = 120;
 
 // Seeded pseudo-random for reproducibility
 let seed = 42;
@@ -129,18 +182,67 @@ function generateTimeSeries(baseValue, growthRate, roundFn) {
   return series;
 }
 
+// Sum two year-series objects (mutates target)
+function addSeries(target, src) {
+  for (const k of Object.keys(src)) {
+    if (/^\d{4}$/.test(k)) {
+      target[k] = (target[k] || 0) + src[k];
+    }
+  }
+}
+
+function roundSeries(series, roundFn) {
+  const out = {};
+  for (const k of Object.keys(series)) out[k] = roundFn(series[k]);
+  return out;
+}
+
+// Recursively build a nested By Offering data tree.
+// Returns { tree: nested-with-aggregates, totalSeries: raw (unrounded) sum }
+function buildOfferingNode(node, baseUnit, growth, roundFn) {
+  // Leaf: numeric share
+  if (typeof node === 'number') {
+    const segBase = baseUnit * node;
+    const series = {};
+    for (let i = 0; i < years.length; i++) {
+      const y = years[i];
+      series[y] = addNoise(segBase * Math.pow(1 + growth, i));
+    }
+    return { tree: roundSeries(series, roundFn), totalSeries: series };
+  }
+  // Parent: object of children
+  const tree = {};
+  const total = {};
+  for (const [childName, childNode] of Object.entries(node)) {
+    let childGrowth = growth;
+    if (typeof childNode === 'number') {
+      const mult = byOfferingGrowth[childName];
+      childGrowth = growth * (mult !== undefined ? mult : 1.0);
+    }
+    const built = buildOfferingNode(childNode, baseUnit, childGrowth, roundFn);
+    tree[childName] = built.tree;
+    addSeries(total, built.totalSeries);
+  }
+  // Attach parent aggregate year data alongside children
+  const rounded = roundSeries(total, roundFn);
+  for (const k of Object.keys(rounded)) tree[k] = rounded[k];
+  return { tree, totalSeries: total };
+}
+
 function generateData(isVolume) {
   const data = {};
   const roundFn = isVolume ? roundToInt : roundTo1;
   const multiplier = isVolume ? volumePerMillionUSD : 1;
 
-  // Generate data for each region and country
   for (const [regionName, countries] of Object.entries(regions)) {
     const regionBase = regionBaseValues[regionName] * multiplier;
     const regionGrowth = regionGrowthRates[regionName];
 
     // Region-level data
     data[regionName] = {};
+    // Hierarchical By Offering
+    data[regionName]["By Offering"] = buildOfferingNode(byOfferingTree, regionBase, regionGrowth, roundFn).tree;
+    // Flat segments
     for (const [segType, segments] of Object.entries(segmentTypes)) {
       data[regionName][segType] = {};
       for (const [segName, share] of Object.entries(segments)) {
@@ -150,11 +252,10 @@ function generateData(isVolume) {
       }
     }
 
-    // Add "By Country" for each region
+    // "By Country" for each region
     data[regionName]["By Country"] = {};
     for (const country of countries) {
       const cShare = countryShares[regionName][country];
-      // Use a slight variation of region growth per country
       const countryGrowthVariation = 1 + (seededRandom() - 0.5) * 0.06;
       const countryBase = regionBase * cShare;
       const countryGrowth = regionGrowth * countryGrowthVariation;
@@ -169,12 +270,13 @@ function generateData(isVolume) {
       const countryGrowth = regionGrowth * countryGrowthVariation;
 
       data[country] = {};
+      // Hierarchical By Offering for country (with slight share variation)
+      data[country]["By Offering"] = buildOfferingNode(byOfferingTree, countryBase * (1 + (seededRandom() - 0.5) * 0.06), countryGrowth, roundFn).tree;
       for (const [segType, segments] of Object.entries(segmentTypes)) {
         data[country][segType] = {};
         for (const [segName, share] of Object.entries(segments)) {
           const segGrowth = countryGrowth * segmentGrowthMultipliers[segType][segName];
           const segBase = countryBase * share;
-          // Add slight country-specific variation to segment share
           const shareVariation = 1 + (seededRandom() - 0.5) * 0.1;
           data[country][segType][segName] = generateTimeSeries(segBase * shareVariation, segGrowth, roundFn);
         }
@@ -191,13 +293,35 @@ const valueData = generateData(false);
 seed = 7777;
 const volumeData = generateData(true);
 
+// Build segmentation_analysis.json structure (Global view)
+function buildStructureNode(node) {
+  if (typeof node === 'number') return {};
+  const out = {};
+  for (const [k, v] of Object.entries(node)) out[k] = buildStructureNode(v);
+  return out;
+}
+const globalStructure = { Global: {} };
+globalStructure.Global["By Offering"] = buildStructureNode(byOfferingTree);
+for (const [segType, segments] of Object.entries(segmentTypes)) {
+  globalStructure.Global[segType] = {};
+  for (const segName of Object.keys(segments)) {
+    globalStructure.Global[segType][segName] = {};
+  }
+}
+globalStructure.Global["By Region"] = {};
+for (const [regionName, countries] of Object.entries(regions)) {
+  globalStructure.Global["By Region"][regionName] = {};
+  for (const country of countries) {
+    globalStructure.Global["By Region"][regionName][country] = {};
+  }
+}
+
 // Write files
 const outDir = path.join(__dirname, 'public', 'data');
 fs.writeFileSync(path.join(outDir, 'value.json'), JSON.stringify(valueData, null, 2));
 fs.writeFileSync(path.join(outDir, 'volume.json'), JSON.stringify(volumeData, null, 2));
+fs.writeFileSync(path.join(outDir, 'segmentation_analysis.json'), JSON.stringify(globalStructure, null, 2));
 
-console.log('Generated value.json and volume.json successfully');
-console.log('Value geographies:', Object.keys(valueData).length);
-console.log('Volume geographies:', Object.keys(volumeData).length);
+console.log('Generated value.json, volume.json, segmentation_analysis.json successfully');
+console.log('Geographies:', Object.keys(valueData).length);
 console.log('Segment types:', Object.keys(valueData['North America']));
-console.log('Sample - North America, By Type:', JSON.stringify(valueData['North America']['By Type'], null, 2));
