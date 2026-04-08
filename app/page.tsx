@@ -209,9 +209,6 @@ export default function DashboardPage() {
         {/* Global KPI Cards */}
         <div className="mb-6">
           <GlobalKPICards />
-          <div className="mt-3 rounded-md border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900" role="alert">
-            <strong>NOTE:</strong> All the data in this dashboard is demo data. No real-world data is related to this.
-          </div>
         </div>
 
 
