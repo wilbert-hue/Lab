@@ -26,8 +26,8 @@ export function ComparisonTable({ title, height = 600 }: ComparisonTableProps) {
     // Filter data
     const filtered = filterData(dataset, filters)
 
-    // Get the selected year (use base year or middle of range)
-    const year = filters.yearRange[0] + Math.floor((filters.yearRange[1] - filters.yearRange[0]) / 2)
+    // Show base year value; growth/CAGR over filtered range
+    const year = data.metadata.base_year || filters.yearRange[0]
     const startYear = filters.yearRange[0]
     const endYear = filters.yearRange[1]
 
@@ -148,7 +148,7 @@ export function ComparisonTable({ title, height = 600 }: ComparisonTableProps) {
     )
   }
 
-  const year = filters.yearRange[0] + Math.floor((filters.yearRange[1] - filters.yearRange[0]) / 2)
+  const year = data.metadata.base_year || filters.yearRange[0]
   const valueUnit = filters.dataType === 'value' 
     ? `${data.metadata.currency} ${data.metadata.value_unit}`
     : data.metadata.volume_unit

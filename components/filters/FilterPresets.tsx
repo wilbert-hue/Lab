@@ -40,7 +40,7 @@ export function FilterPresets() {
   {
     id: 'top-markets',
     name: 'Top Markets',
-        description: 'Top 3 regions by 2023 market size',
+        description: 'Top 3 regions by 2025 market size',
     icon: <Globe className="h-4 w-4" />,
         filters: topMarketFilters
   },
@@ -65,7 +65,7 @@ export function FilterPresets() {
     icon: <BarChart3 className="h-4 w-4" />,
     filters: {
       viewMode: 'matrix',
-      yearRange: [2023, 2027],
+      yearRange: [2025, 2033],
       dataType: 'value',
     }
   },

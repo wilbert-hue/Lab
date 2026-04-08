@@ -1,46 +1,37 @@
 {
-  "Global": {
-    "By Simulation Channel": {
-      "Email Phishing": {},
-      "SMS Phishing (Smishing)": {},
-      "Voice Phishing (Vishing)": {},
-      "Collaboration Platform Phishing (Teams, Slack, etc.)": {},
-      "Multi-Channel Phishing": {}
+  "U.S.": {
+    "By Lab Type": {
+      "Clinical Diagnostic Labs": {},
+      "Pathology Labs": {},
+      "Research & Academic Labs": {},
+      "Pharma & Biotech R&D": {},
+      "Environmental/Testing Labs": {}
     },
-    "By Simulation Sophistication": {
-      "Static / Template-Based Simulation": {},
-      "Contextual / Role-Based Simulation": {},
-      "AI-Generated / Adaptive Simulation": {}
+    "By Service": {
+      "Entire Laboratory Relocations": {},
+      "Equipment Relocation": {},
+      "Sample & Material Transfer": {},
+      "IT & Data Migration": {},
+      "Facility Setup": {},
+      "Decommissioning": {}
     },
-    "By Platform Category": {
-      "Standalone Phishing Simulation Tools": {},
-      "Security Awareness & Training Platforms (with simulation)": {},
-      "Human Risk Management (HRM) Platforms": {}
+    "By Customer Vertical": {
+      "Pharmaceutical Companies": {},
+      "Biotechnology Companies": {},
+      "Clinical and Hospital Laboratories": {},
+      "Academic and University Research Labs": {},
+      "Government and Public Health Laboratories": {},
+      "Forensic Laboratories": {},
+      "Environmental Testing Laboratories": {},
+      "Food and beverage Testing Laboratories": {},
+      "Others (Industrial and Materials Testing Laboratories, etc.)": {}
     },
-    "By Analytics Maturity": {
-      "Descriptive Analytics (campaign results, click rates)": {},
-      "Behavioral Analytics (user interaction patterns)": {},
-      "Predictive / Risk-Based Analytics (risk scoring, forecasting)": {}
-    },
-    "By Deployment Model": {
-      "Cloud-Based (SaaS)": {},
-      "On-Premises": {}
-    },
-    "By Organization Size": {
-      "Large Enterprises": {},
-      "Small & Mid-Sized Enterprises": {}
-    },
-    "By Industry Vertical": {
-      "BFSI": {},
-      "Healthcare & Life Sciences": {},
-      "IT & Telecom": {},
-      "Government & Defense": {},
-      "Retail & E-commerce": {},
-      "Manufacturing": {},
-      "Others (Energy & Utilities, Education, etc.)": {}
-    },
-    "By Region": {
-      "U.S.": {}
+    "By U.S. Region": {
+      "Northeast": {},
+      "Southeast": {},
+      "Midwest": {},
+      "West": {},
+      "Southwest": {}
     }
   }
 }

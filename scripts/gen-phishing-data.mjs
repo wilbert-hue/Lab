@@ -1,96 +1,117 @@
 import fs from 'fs';
 import path from 'path';
 
-const years = [];
-for (let y = 2021; y <= 2033; y++) years.push(y);
+// Source: Dataset-U.S. Laboratories Relocation Market.xlsx (Master Sheet)
+// Years: 2025-2033
+const years = [2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033];
 
-// Segment definitions (flat, single-level children)
-const segments = {
-  'By Simulation Channel': [
-    ['Email Phishing', 0.42],
-    ['SMS Phishing (Smishing)', 0.16],
-    ['Voice Phishing (Vishing)', 0.10],
-    ['Collaboration Platform Phishing (Teams, Slack, etc.)', 0.14],
-    ['Multi-Channel Phishing', 0.18],
-  ],
-  'By Simulation Sophistication': [
-    ['Static / Template-Based Simulation', 0.38],
-    ['Contextual / Role-Based Simulation', 0.37],
-    ['AI-Generated / Adaptive Simulation', 0.25],
-  ],
-  'By Platform Category': [
-    ['Standalone Phishing Simulation Tools', 0.28],
-    ['Security Awareness & Training Platforms (with simulation)', 0.45],
-    ['Human Risk Management (HRM) Platforms', 0.27],
-  ],
-  'By Analytics Maturity': [
-    ['Descriptive Analytics (campaign results, click rates)', 0.40],
-    ['Behavioral Analytics (user interaction patterns)', 0.34],
-    ['Predictive / Risk-Based Analytics (risk scoring, forecasting)', 0.26],
-  ],
-  'By Deployment Model': [
-    ['Cloud-Based (SaaS)', 0.78],
-    ['On-Premises', 0.22],
-  ],
-  'By Organization Size': [
-    ['Large Enterprises', 0.62],
-    ['Small & Mid-Sized Enterprises', 0.38],
-  ],
-  'By Industry Vertical': [
-    ['BFSI', 0.22],
-    ['Healthcare & Life Sciences', 0.16],
-    ['IT & Telecom', 0.18],
-    ['Government & Defense', 0.15],
-    ['Retail & E-commerce', 0.12],
-    ['Manufacturing', 0.10],
-    ['Others (Energy & Utilities, Education, etc.)', 0.07],
-  ],
+// Value (US$ Million) by segment > sub-segment
+const valueRows = {
+  'By Lab Type': {
+    'Clinical Diagnostic Labs':   [283.5939079105836,296.8620638940746,311.5426127846641,328.19532086642164,347.16033629838427,368.84134109447893,393.3517425765604,420.1183610304024,448.7063820252897],
+    'Pathology Labs':             [56.455076631405014,58.52678781098042,60.73734978065492,63.09520599316127,65.70119644568099,68.56031594702905,71.57610520792787,74.87225717670975,78.38059848933258],
+    'Research & Academic Labs':   [6.511998210522537,7.067829643624169,7.685239713120226,8.377077595293358,9.161911809363014,10.047761547330238,11.02931035790136,12.092039262467987,13.246976545172663],
+    'Pharma & Biotech R&D':       [79.16972112149774,85.17832526697045,91.8417032280167,99.240644977388,107.63262208283108,117.20064871302289,127.85362856276714,139.34705983110703,151.65074730802425],
+    'Environmental/Testing Labs': [32.50929612599111,34.971264486458,37.68962322098337,40.719788933471335,44.142879430613064,47.986159108488685,52.21203833891012,56.740451646539235,61.61380043667087],
+  },
+  'By Service': {
+    'Entire Laboratory Relocations': [142.4597425599835,150.82234711051422,160.07804225089632,170.54205486037802,182.4290966529805,195.99601920495383,211.35587336957437,228.25658854898947,246.50874085206686],
+    'Equipment Relocation':          [153.36010709504686,159.36322313761195,165.9878490270276,173.51887496176107,182.2834173558649,192.54295323525054,204.11322077590142,216.28224316606622,228.78273228377202],
+    'Sample & Material Transfer':    [31.379837297909585,32.57719145394949,33.89619087303903,35.37709693773105,37.009990503379306,38.755263200233145,40.67326631896569,42.76096268781943,44.96943414128013],
+    'IT & Data Migration':           [30.766396869529398,33.10148568039483,35.70758914897254,38.602190701892916,41.80221104338971,45.35737149401377,49.30018394627748,53.64786678826987,58.47910812474547],
+    'Facility Setup':                [71.72534239522192,77.34074819343085,83.47880829892294,90.19169825681358,97.6682545101939,105.98087551407659,115.05084148121448,125.13444706035966,136.20277191709488],
+    'Decommissioning':               [28.548573782308722,29.401275526206256,30.34804912858086,31.396122647159007,32.60597600106412,34.003743761821895,35.52943915213341,37.08806069572175,38.6557174855307],
+  },
+  'By Customer Vertical': {
+    'Pharmaceutical Companies':                                       [91.26106065286788,97.74131248832536,104.90960997125968,112.83453497583105,121.74934915047754,131.36850363888968,142.05417336441877,153.7281168739976,166.56410084699044],
+    'Biotechnology Companies':                                        [60.305912882298415,65.28034139789165,70.81730332034432,76.97977084830939,83.94540705196572,91.54133985415697,99.67203373879852,108.40910947151997,117.83817471231768],
+    'Clinical and Hospital Laboratories':                             [194.31905262073934,201.82847768157762,210.01339804422253,219.39596251476883,230.0367387429854,243.30918834917264,258.7835574750257,275.63155597883315,293.1461306915086],
+    'Academic and University Research Labs':                          [47.89554113891463,51.45512747746691,55.39923599165814,59.76760091299125,64.68765699338671,70.01273103442404,75.869514335748,82.43157879743376,89.66988689434045],
+    'Government and Public Health Laboratories':                      [23.68823808052724,24.421636537227734,25.2265846115802,26.125335027153227,27.20414889174192,28.409123506528804,29.69588012658591,31.00132431242696,32.33802934842896],
+    'Forensic Laboratories':                                          [11.372241787663475,11.645494700298388,11.952486171391792,12.295459499929471,12.7220471115226,13.218563934689481,13.760895974293298,14.311717949604242,14.861690216460788],
+    'Environmental Testing Laboratories':                             [18.544776027185666,19.21887303622324,19.97192674159999,20.801088536346725,21.74441162063128,22.75551606716692,23.833673141743468,24.96911613035061,26.155323900703344],
+    'Food and beverage Testing Laboratories':                         [5.332212954381629,5.422329421295519,5.52481355029259,5.643967505208098,5.797673742492113,5.97295899381065,6.159516729535167,6.343688668585197,6.528021134268885],
+    'Others (Industrial and Materials Testing Laboratories, etc.)':   [5.520963855421686,5.592678361801234,5.68117032509,5.784318545197653,5.9115127616690835,6.048301031510504,6.193580157918071,6.343960764475033,6.497147059470926],
+  },
+  'By U.S. Region': {
+    'Northeast': [109.90021213057366,116.89465007970983,124.51580036818797,133.2469929469312,143.78861280322405,156.78176219362962,172.19412894540238,189.43777530215255,208.1487491807742],
+    'Southeast': [94.94170322314899,98.82235561327842,103.12515228389695,108.02779643545746,113.63163627880287,120.05645098715082,127.32475515900893,135.2361853677908,143.63919891298087],
+    'Midwest':   [80.73819791988467,84.26530826238024,88.1429789252552,92.39309449018775,96.98371653027301,101.8024271610825,106.69088842793363,111.69014997265096,116.84754064207573],
+    'West':      [116.55368139223556,124.3828008903315,133.0902343009981,142.7177765480969,153.30340960710865,164.8504678429502,177.41242371542285,190.977799522629,205.5549614595592],
+    'Southwest': [56.106205334157146,58.241156256407564,60.622362849101,63.242377945062316,66.09157084746383,69.14511822553663,72.40062879629902,75.82825878200316,79.40805460910013],
+  },
 };
 
-// US value totals (USD Million) — demo curve, base 2026
-const valueTotals = {
-  2021: 612.5, 2022: 705.3, 2023: 818.7, 2024: 951.4, 2025: 1104.9,
-  2026: 1281.8, 2027: 1487.0, 2028: 1724.9, 2029: 2001.8, 2030: 2322.1,
-  2031: 2693.6, 2032: 3124.6, 2033: 3624.5,
-};
-// US volume totals (Thousand seats / users)
-const volumeTotals = {
-  2021: 18.2, 2022: 20.5, 2023: 23.1, 2024: 26.0, 2025: 29.3,
-  2026: 33.0, 2027: 37.2, 2028: 41.9, 2029: 47.2, 2030: 53.2,
-  2031: 60.0, 2032: 67.6, 2033: 76.2,
+// Volume (No. of Moves) by segment > sub-segment
+const volumeRows = {
+  'By Lab Type': {
+    'Clinical Diagnostic Labs':   [3634,3808,3996,4196,4406,4624,4849,5083,5323],
+    'Pathology Labs':             [359,373,388,404,422,441,462,483,504],
+    'Research & Academic Labs':   [100,106,112,119,126,134,142,151,160],
+    'Pharma & Biotech R&D':       [359,382,407,434,463,494,527,561,597],
+    'Environmental/Testing Labs': [348,365,385,407,429,452,476,502,529],
+  },
+  'By Service': {
+    'Entire Laboratory Relocations': [900,947,998,1053,1111,1171,1234,1299,1366],
+    'Equipment Relocation':          [1250,1310,1372,1438,1508,1582,1654,1725,1796],
+    'Sample & Material Transfer':    [700,722,748,776,805,834,864,896,928],
+    'IT & Data Migration':           [450,480,512,546,582,621,663,708,756],
+    'Facility Setup':                [950,1002,1061,1126,1194,1265,1340,1421,1506],
+    'Decommissioning':               [550,573,597,621,646,672,701,731,761],
+  },
+  'By Customer Vertical': {
+    'Pharmaceutical Companies':                                       [520,553,589,628,670,714,761,810,862],
+    'Biotechnology Companies':                                        [360,386,414,445,478,513,550,590,632],
+    'Clinical and Hospital Laboratories':                             [2340,2446,2564,2688,2812,2939,3068,3203,3340],
+    'Academic and University Research Labs':                          [700,740,782,827,876,929,985,1043,1103],
+    'Government and Public Health Laboratories':                      [330,338,346,355,366,378,391,404,416],
+    'Forensic Laboratories':                                          [130,133,136,140,144,148,152,156,160],
+    'Environmental Testing Laboratories':                             [250,262,275,289,304,320,337,354,372],
+    'Food and beverage Testing Laboratories':                         [90,93,96,99,103,107,111,115,119],
+    'Others (Industrial and Materials Testing Laboratories, etc.)':   [80,83,86,89,93,97,101,105,109],
+  },
+  'By U.S. Region': {
+    'Northeast': [1040,1105,1178,1249,1316,1384,1455,1533,1615],
+    'Southeast': [1170,1216,1264,1318,1378,1442,1510,1580,1651],
+    'Midwest':   [940,975,1013,1055,1099,1144,1188,1231,1274],
+    'West':      [980,1036,1095,1161,1235,1314,1399,1489,1582],
+    'Southwest': [670,702,738,777,818,861,904,947,991],
+  },
 };
 
-const r = (n) => Math.round(n * 10) / 10;
+const r = (n) => Math.round(n * 10000) / 10000;
 
-function buildSegments(totals) {
+function build(rows) {
   const out = {};
-  for (const [segName, items] of Object.entries(segments)) {
-    const seg = {};
-    for (const y of years) seg[String(y)] = r(totals[y]);
-    // Normalize shares
-    const sum = items.reduce((a, [, s]) => a + s, 0);
-    for (const [name, share] of items) {
+  for (const [seg, items] of Object.entries(rows)) {
+    const segObj = {};
+    // Segment total = sum of children per year (avoids double counting since each segmentation
+    // represents the SAME total market sliced differently)
+    const totals = years.map((_, idx) =>
+      Object.values(items).reduce((a, arr) => a + arr[idx], 0)
+    );
+    years.forEach((y, idx) => { segObj[String(y)] = r(totals[idx]); });
+    for (const [name, arr] of Object.entries(items)) {
       const child = {};
-      for (const y of years) child[String(y)] = r(totals[y] * (share / sum));
-      seg[name] = child;
+      years.forEach((y, idx) => { child[String(y)] = r(arr[idx]); });
+      segObj[name] = child;
     }
-    out[segName] = seg;
+    out[seg] = segObj;
   }
   return out;
 }
 
-const valueData = { 'U.S.': buildSegments(valueTotals) };
-const volumeData = { 'U.S.': buildSegments(volumeTotals) };
+const valueData = { 'U.S.': build(valueRows) };
+const volumeData = { 'U.S.': build(volumeRows) };
 
 const segAnalysis = {
-  'Global': Object.fromEntries(
-    Object.entries(segments).map(([k, items]) => [
+  'U.S.': Object.fromEntries(
+    Object.entries(valueRows).map(([k, items]) => [
       k,
-      Object.fromEntries(items.map(([n]) => [n, {}])),
+      Object.fromEntries(Object.keys(items).map(n => [n, {}])),
     ])
   ),
 };
-segAnalysis['Global']['By Region'] = { 'U.S.': {} };
 
 const dir = path.resolve('public/data');
 fs.writeFileSync(path.join(dir, 'value.json'), JSON.stringify(valueData, null, 2));
